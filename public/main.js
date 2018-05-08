@@ -1,8 +1,15 @@
 // cities info array
 var cities = [];
+// var sorted = "false";
 
 var updateList = function (){
     $('.city-list').empty();
+    if (cities.length > 0){
+        $('.city-list').append("<button type=\"button\" onclick=\"sortByName();\">sort by name</button>");
+        $('.city-list').append("<button type=\"button\" onclick=\"sortByName();\">sort by temp</button>");
+        $('.city-list').append("<button type=\"button\" onclick=\"sortByName();\">sort by date</button>");
+        $('.city-list').append("<button type=\"button\" onclick=\"clearAll();\">clear all</button>");
+    }
     cities.forEach((city, index) => {
         // https://stackoverflow.com/questions/4631928/convert-utc-epoch-to-local-date
         // (new Date(city.dt * 1000)).toString();
@@ -19,7 +26,7 @@ var updateList = function (){
     //add comment function 
     $('.add-comment').on('submit', function () {
         // event.preventDefault();
-        console.log(event);
+        // console.log(event);
         if(!(cities[$(this).closest("div").data().index].comments)){
             cities[$(this).closest("div").data().index].comments = [$(this).find("input").val()];
         }
@@ -44,10 +51,15 @@ var updateList = function (){
 }
 
 $('.get-temp').on('submit', function (e) {
-    console.log(e);
-    console.log(event)
+    // console.log(e);
+    // console.log(event)
     event.preventDefault();
-    var url = "http://api.openweathermap.org/data/2.5/weather?q="+$('.city-input').val()+"&units=metric&APPID=d703871f861842b79c60988ccf3b17ec"
+    getCityTemp($('.city-input').val());
+});
+
+var getCityTemp = function (city) {
+    var apikey = "afb196bf89494ca1a0cd856cf4ff5f80"; //d703871f861842b79c60988ccf3b17ec
+    var url = "http://api.openweathermap.org/data/2.5/weather?q="+city+"&units=metric&APPID="+apikey;
     $.ajax({
         method: "GET",
         url: url,
@@ -60,15 +72,57 @@ $('.get-temp').on('submit', function (e) {
             alert("error");
         }
     })
-});
+}
 
 var saveToLocalStorage = function () {
     localStorage.setItem('weather-chat', JSON.stringify(cities));
 };
 
 var restoreFromLocalStorage = function () {
-    cities = JSON.parse(localStorage.getItem('weather-chat'));
+    cities = JSON.parse(localStorage.getItem('weather-chat')) || [];
     updateList();
 };
 
 restoreFromLocalStorage();
+
+var getCurrentTemp = function () {
+    cities.forEach(city => getCityTemp(city.name))
+}
+
+getCurrentTemp();
+
+var sortByName = function () {
+    cities.sort(function (a,b) {
+        if (a.name > b.name){
+            return 1;
+        }
+        if (a.name < b.name){
+            return -1;
+        }
+        return 0;
+    });
+    saveToLocalStorage();
+    updateList();
+}
+
+var sortByTemp = function () {
+    cities.sort(function (a,b) {
+        return a.main.temp - b.main.temp;
+    });
+    saveToLocalStorage();
+    updateList();
+}
+
+var sortByDate = function () {
+    cities.sort(function (a,b) {
+        return a.dt - b.dt;
+    });
+    saveToLocalStorage();
+    updateList();
+}
+
+var clearAll = function () {
+    cities = []
+    saveToLocalStorage();
+    updateList();
+}
