@@ -26,16 +26,19 @@ var updateList = function (){
         else {
             cities[$(this).closest("div").data().index].comments.push($(this).find("input").val());
         }
+        saveToLocalStorage();
         updateList();
     });
     // delete city
     $('.delete-city').click(function () {
         cities.splice($(this).closest("div.city").data().index, 1);
+        saveToLocalStorage();
         updateList();
     });
     //delete comment
     $('.delete-comment').click(function () {
         cities[$(this).closest("div.city").data().index].comments.splice($(this).closest("div.comment").data().index, 1);
+        saveToLocalStorage();
         updateList();
     });
 }
@@ -50,6 +53,7 @@ $('.get-temp').on('submit', function (e) {
         url: url,
         success: function (data){
             cities.push(data);
+            saveToLocalStorage();
             updateList();
         },
         error: function (error){
@@ -59,5 +63,12 @@ $('.get-temp').on('submit', function (e) {
 });
 
 var saveToLocalStorage = function () {
-    
-}
+    localStorage.setItem('weather-chat', JSON.stringify(cities));
+};
+
+var restoreFromLocalStorage = function () {
+    cities = JSON.parse(localStorage.getItem('weather-chat'));
+    updateList();
+};
+
+restoreFromLocalStorage();
