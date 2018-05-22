@@ -15,23 +15,27 @@ var updateList = function (){
         // (new Date(city.dt * 1000)).toString();
         var d = new Date(0);
         d.setUTCSeconds(city.dt);
-        var div = $("<div data-index=\""+index+"\" class=\"city\"><h3>"+city.name+"</h3><p><b>temp:</b> "+city.main.temp+
-        "°</br><b>full time:</b> "+d.toString()+"</p><button type=\"button\" class=\"delete-city\">Delete</button></div>").appendTo('.city-list');
-        var commentsList = $("<ul></ul>").appendTo(div);
+        var card = $("<div data-index=\""+index+"\" class=\"card city mb-3\"></div>").appendTo('.city-list');
+        var cardBody =$("<div class=\"card-body\"><div class=\"container\"><div class=\"row\"><h3 class=\"card-title\">"
+        +city.name+"</h3><button type=\"button\" class=\"btn btn-outline-danger delete-city\"><i class=\"fas fa-trash-alt\"></i></button></div></div><p class=\"card-text\"><b>temp:</b> "+city.main.temp+"°</br><b>full time:</b> "+d.toString()+
+        "</p></div>").appendTo(card);
+        var commentsList = $("<ul></ul>").appendTo(cardBody);
         // !city.comments || city.comments.forEach((comment, index) => commentsList.append("<li data-index=\""+index+"\">"+comment+"</li>"));
         !city.comments ? 0 : city.comments.forEach((comment, index) => commentsList.append("<div data-index=\""+index+"\"  class=\"comment\">"+comment+
-        "<button type=\"button\" class=\"delete-comment\">Delete</button></div>"));
-        div.append("<form class=\"add-comment\"><input type=\"text\" placeholder=\"Enter Comment\" required><button type=\"submit\">Comment</button></form>");
+        "<button type=\"button\" class=\"btn btn-outline-danger delete-comment\"><i class=\"fas fa-trash-alt\"></i></button></div>"));
+        cardBody.append("<form class=\"add-comment\"><div class=\"input-group\"><input type=\"text\" placeholder=\"Enter Comment\""+
+        " class=\"form-control\" required><div class=\"input-group-append\"><button type=\"submit\" class=\"btn btn-success\">Comment</button>"
+        +"</div></div></form>");
     });
     //add comment function 
-    $('.add-comment').on('submit', function () {
-        // event.preventDefault();
+    $('.add-comment').on('submit', function (event) {
+        event.preventDefault();
         // console.log(event);
-        if(!(cities[$(this).closest("div").data().index].comments)){
-            cities[$(this).closest("div").data().index].comments = [$(this).find("input").val()];
+        if(!(cities[$(this).closest("div.city").data().index].comments)){
+            cities[$(this).closest("div.city").data().index].comments = [$(this).find("input").val()];
         }
         else {
-            cities[$(this).closest("div").data().index].comments.push($(this).find("input").val());
+            cities[$(this).closest("div.city").data().index].comments.unshift($(this).find("input").val());
         }
         saveToLocalStorage();
         updateList();
@@ -55,6 +59,7 @@ $('.get-temp').on('submit', function (e) {
     // console.log(event)
     event.preventDefault();
     getCityTemp($('.city-input').val());
+    $('.city-input').val("");
 });
 
 var getCityTemp = function (city) {
@@ -64,7 +69,7 @@ var getCityTemp = function (city) {
         method: "GET",
         url: url,
         success: function (data){
-            cities.push(data);
+            cities.unshift(data);
             saveToLocalStorage();
             updateList();
         },
